@@ -1,0 +1,18 @@
+When Russia set out to interfere with the 2016 election, it went all out. Over the course of the election, a wide-ranging group of Russians probed state voter databases for insecurities; hacked the Hillary Clinton campaign, the Democratic Congressional Campaign Committee and the Democratic National Committee; tried to hack the campaign of Sen. Marco Rubio and the Republican National Committee; released politically damaging information on the internet; spread propaganda on Twitter, Facebook, YouTube and Instagram; staged rallies in Florida and Pennsylvania; set up meetings with members of the Trump campaign and its associates; and floated a business proposition for a skyscraper in Moscow to the Trump Organization.
+
+The goal, as determined by the U.S. intelligence community and backed up by evidence gathered by Special Counsel Robert Mueller: To damage the Clinton campaign, boost Trump’s chances and sow distrust in American democracy overall.
+
+Probing state voter databases
+U.S. intelligence agencies have concluded that Russia did not alter actual votes during the 2016 election. But Russians did target voter registration systems or state websites in at least 21 states before Election Day, fully accessed some states’ systems and stole hundreds of thousands of voters’ personal information. 
+
+In July of 2018, Mueller indicted 12 Russian nationals for their part in allegedly hacking into U.S. election systems. The prosecutors offered up more details, including saying that hackers stole information on 500,000 voters from an unnamed state’s website, including names, addresses, partial Social Security numbers, dates of birth and driver’s license numbers. Russians then visited the websites of counties in Georgia, Iowa and Florida, according to the indictment. The hackers also penetrated a voter registration software vendor, according to the indictment, and posed as the company sending malicious emails to several Florida election administrators.
+
+Hacking the Clinton campaign
+One of the most striking elements of Russia’s plan to influence the U.S. election did not involve votes at all, but rather agents with Russian military intelligence, known as GRU, hacking into the emails of staff working for Hillary Clinton’s presidential campaign. These efforts, as laid out by Mueller in the key July 2018 indictment, began in earnest in March of 2016.
+
+During that month, the agents sent emails that looked like Google security notifications to many Clinton campaign staffers and volunteers. But rather than helping them lock down their accounts, these emails instructed recipients to click a link to change their password, and when the user did so, this gave the Russian agents access to their accounts. Using this method, the GRU agents stole tens of thousands of emails from Clinton campaign staffers, including campaign chairman John Podesta.
+
+Hacking the Democratic National Committee
+The Russian agents, posing as Guccifer 2.0, soon shared stolen documents with WikiLeaks, which promised it would ensure the material “will have a much higher impact than what you are doing,” according to Mueller’s indictment. On July 22, just days before the Democratic National Convention, WikiLeaks released more than 20,000 stolen emails.
+
+This dump piqued the interest of the Trump campaign. According to an indictment against longtime Trump confidant Roger Stone, a “senior Trump Campaign official was directed to contact Stone about any additional releases and what other damaging information” WikiLeaks had about Clinton’s campaign. Stone had been bragging about connections to WikiLeaks, and as the election approached, prosecutors say he continued to update the Trump campaign about the group’s plans. 

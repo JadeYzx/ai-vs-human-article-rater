@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article Impact Rater</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a18;
+    --ink2: #4a4a46;
+    --ink3: #8a8a84;
+    --paper: #f5f2eb;
+    --paper2: #ede9df;
+    --paper3: #e3dece;
+    --accent: #b5410a;
+    --accent2: #d4600e;
+    --gold: #c9a227;
+    --border: rgba(26,26,24,0.12);
+    --border2: rgba(26,26,24,0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 0.85rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-primary:disabled { background: var(--ink3); cursor: not-allowed; }
+
+  /* ── RATING SCREEN ── */
+  #rating-screen { display: none; }
+  .top-bar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .top-bar-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1rem;
+    letter-spacing: -0.2px;
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    max-width: 300px;
+    margin: 0 2rem;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 0.78rem;
+    color: rgba(245,242,235,0.6);
+    white-space: nowrap;
+  }
+
+  .rating-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .topic-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .topic-kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  .topic-name {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.7rem;
+    letter-spacing: -0.3px;
+  }
+  .blind-note {
+    font-size: 0.8rem;
+    color: var(--ink3);
+    margin-top: 0.4rem;
+  }
+
+  .articles-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    align-items: start;
+  }
+  .article-pane {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .article-pane-header {
+    background: var(--paper2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.65rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .article-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--ink2);
+  }
+  .article-body {
+    padding: 1.5rem;
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--ink);
+    white-space: pre-wrap;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  /* rating panels */
+  .rating-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .rating-panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+  }
+  .rating-panel h4 {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--ink2);
+    margin-bottom: 1.1rem;
+  }
+  .metric-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .metric-label {
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-weight: 500;
+    width: 90px;
+  }
+  .stars {
+    display: flex;
+    gap: 4px;
+  }
+  .star {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--border2);
+    font-size: 22px;
+    line-height: 1;
+    transition: color 0.1s, transform 0.1s;
+  }
+  .star:hover, .star.active { color: var(--gold); }
+  .star:hover { transform: scale(1.15); }
+  .metric-score {
+    font-size: 0.78rem;
+    color: var(--ink3);
+    width: 30px;
+    text-align: right;
+  }
+  .rating-panel textarea {
+    width: 100%;
+    height: 70px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    background: var(--paper);
+    color: var(--ink);
+    resize: none;
+    line-height: 1.5;
+    margin-top: 0.75rem;
+  }
+  .rating-panel textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .rating-panel textarea::placeholder { color: var(--ink3); }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+  }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border2);
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    color: var(--ink2);
+    transition: background 0.15s;
+  }
+  .btn-ghost:hover { background: var(--paper2); }
+  .btn-ghost:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .dot-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border2);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot.done { background: var(--gold); }
+  .dot.current { background: var(--ink); }
+
+  /* ── RESULTS SCREEN ── */
+  #results-screen { display: none; max-width: 900px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  .results-header { text-align: center; margin-bottom: 3rem; }
+  .results-header h2 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .results-header p { color: var(--ink3); font-size: 0.9rem; }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 3rem;
+    font-size: 0.88rem;
+  }
+  .results-table th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .results-table th:not(:first-child) { text-align: center; }
+  .results-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .results-table td:not(:first-child) { text-align: center; }
+  .results-table tr:nth-child(even) td { background: var(--paper2); }
+  .score-badge {
+    display: inline-block;
+    background: var(--paper2);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+  .score-badge.high { background: #d4edda; color: #1a5c2a; }
+  .score-badge.mid { background: #fff3cd; color: #7a5c00; }
+  .score-badge.low { background: #f8d7da; color: #721c24; }
+  .winner-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: white;
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    font-weight: 500;
+  }
+  .reveal-row td { background: var(--paper3) !important; font-style: italic; }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .summary-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .summary-card .metric-name {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 0.5rem;
+  }
+  .summary-card .ai-score { font-size: 1.5rem; font-weight: 500; color: var(--accent); }
+  .summary-card .human-score { font-size: 1.5rem; font-weight: 500; color: #1a5c2a; }
+  .summary-card .vs { font-size: 0.75rem; color: var(--ink3); margin: 0.2rem 0; }
+
+  .export-btn {
+    display: block;
+    margin: 0 auto;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 0.9rem 2.5rem;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .export-btn:hover { background: var(--accent); }
+
+  @media (max-width: 700px) {
+    .topic-grid, .articles-row, .rating-panels, .summary-cards { grid-template-columns: 1fr; }
+    .article-pair { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ RATING ════════════════════ -->
+<div id="rating-screen">
+  <div class="top-bar">
+    <span class="top-bar-title">Impact Rater</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span class="progress-label" id="progress-label">Topic 1 of 8</span>
+  </div>
+  <div class="rating-layout">
+    <div class="topic-header">
+      <div class="topic-kicker">Blind Evaluation — Topic <span id="topic-num">1</span></div>
+      <div class="topic-name" id="topic-name-display"></div>
+      <div class="blind-note">You are rating two articles. Their origins are hidden.</div>
+    </div>
+
+    <div class="articles-row">
+      <div class="article-pane">
+        <div class="article-pane-header">
+          <span class="article-label">Article A</span>
+        </div>
+        <div class="article-body" id="article-a-body"></div>
+      </div>
+      <div class="article-pane">
+        <div class="article-pane-header">
+          <span class="article-label">Article B</span>
+        </div>
+        <div class="article-body" id="article-b-body"></div>
+      </div>
+    </div>
+
+    <div class="rating-panels">
+      <div class="rating-panel">
+        <h4>Rate Article A</h4>
+        <div class="metric-row">
+          <span class="metric-label">Grammar</span>
+          <div class="stars" id="stars-a-grammar"></div>
+          <span class="metric-score" id="score-a-grammar">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Cadence</span>
+          <div class="stars" id="stars-a-cadence"></div>
+          <span class="metric-score" id="score-a-cadence">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Accuracy</span>
+          <div class="stars" id="stars-a-accuracy"></div>
+          <span class="metric-score" id="score-a-accuracy">—</span>
+        </div>
+        <textarea id="notes-a" placeholder="Optional notes on Article A…"></textarea>
+      </div>
+      <div class="rating-panel">
+        <h4>Rate Article B</h4>
+        <div class="metric-row">
+          <span class="metric-label">Grammar</span>
+          <div class="stars" id="stars-b-grammar"></div>
+          <span class="metric-score" id="score-b-grammar">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Cadence</span>
+          <div class="stars" id="stars-b-cadence"></div>
+          <span class="metric-score" id="score-b-cadence">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Accuracy</span>
+          <div class="stars" id="stars-b-accuracy"></div>
+          <span class="metric-score" id="score-b-accuracy">—</span>
+        </div>
+        <textarea id="notes-b" placeholder="Optional notes on Article B…"></textarea>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← Previous</button>
+      <div class="dot-nav" id="dot-nav"></div>
+      <button class="btn-ghost" id="next-btn" onclick="navigate(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ RESULTS ════════════════════ -->
+<div id="results-screen">
+  <div class="results-header">
+    <h2>Evaluation Report</h2>
+    <p>Ratings revealed — A = AI-written, B = Human-written for each topic.</p>
+  </div>
+
+  <div class="summary-cards" id="summary-cards"></div>
+
+  <table class="results-table" id="results-table">
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Grammar A (AI)</th>
+        <th>Cadence A (AI)</th>
+        <th>Accuracy A (AI)</th>
+        <th>Grammar B (Human)</th>
+        <th>Cadence B (Human)</th>
+        <th>Accuracy B (Human)</th>
+        <th>Overall Winner</th>
+      </tr>
+    </thead>
+    <tbody id="results-tbody"></tbody>
+  </table>
+
+  <button class="export-btn" onclick="exportCSV()">Export Results as CSV</button>
+</div>
+
+<script>
+const METRICS = ['grammar','cadence','accuracy'];
+
+// state
+let topics = [];
+let ratings = {};
+let currentTopic = 0;
+let shuffleMap = {}; // topic idx -> {a: 'ai'|'human', b: 'ai'|'human'}
+
+async function initApp() {
+  try {
+    const res = await fetch('/api/topics', { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`Failed to load topics (${res.status})`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      alert('No topics found in the backend. Add article pairs in the "articles/" folder (e.g. 1A.txt + 1H.txt), then refresh.');
+      return;
+    }
+
+    topics = data
+      .filter(t => t && typeof t.name === 'string' && typeof t.human === 'string' && typeof t.ai === 'string')
+      .map(t => ({ name: t.name.trim() || 'Untitled topic', human: t.human.trim(), ai: t.ai.trim() }))
+      .filter(t => t.human && t.ai);
+
+    if (topics.length === 0) {
+      alert('Topics were loaded, but none had both a human and AI article. Fix the stored data then refresh.');
+      return;
+    }
+
+    // assign blind labels (randomise which is A/B per topic)
+    shuffleMap = {};
+    ratings = {};
+    topics.forEach((_, idx) => {
+      const flip = Math.random() > 0.5;
+      shuffleMap[idx] = { a: flip ? 'human' : 'ai', b: flip ? 'ai' : 'human' };
+      ratings[idx] = { a: {grammar:0,cadence:0,accuracy:0}, b: {grammar:0,cadence:0,accuracy:0}, notes_a:'', notes_b:'' };
+    });
+
+    currentTopic = 0;
+    document.getElementById('rating-screen').style.display = 'block';
+    buildDots();
+    renderTopic();
+  } catch (e) {
+    console.error(e);
+    alert('Could not reach the backend. Start the server (node server.js) and open http://localhost:3000/');
+  }
+}
+
+// ── DOTS ──
+function buildDots() {
+  const nav = document.getElementById('dot-nav');
+  nav.innerHTML = '';
+  topics.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.title = topics[i].name;
+    d.onclick = () => jumpTo(i);
+    nav.appendChild(d);
+  });
+}
+function updateDots() {
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((d, i) => {
+    d.className = 'dot';
+    if (i === currentTopic) d.classList.add('current');
+    else if (isRated(i)) d.classList.add('done');
+  });
+}
+function isRated(i) {
+  const r = ratings[i];
+  return r && METRICS.every(m => r.a[m] > 0 && r.b[m] > 0);
+}
+
+// ── RENDER TOPIC ──
+function renderTopic() {
+  const t = topics[currentTopic];
+  const sm = shuffleMap[currentTopic];
+  document.getElementById('topic-num').textContent = currentTopic + 1;
+  document.getElementById('topic-name-display').textContent = t.name;
+  document.getElementById('article-a-body').textContent = sm.a === 'ai' ? t.ai : t.human;
+  document.getElementById('article-b-body').textContent = sm.b === 'ai' ? t.ai : t.human;
+  // stars
+  ['a','b'].forEach(side => {
+    METRICS.forEach(metric => {
+      buildStars(side, metric, ratings[currentTopic][side][metric]);
+    });
+  });
+  document.getElementById('notes-a').value = ratings[currentTopic].notes_a || '';
+  document.getElementById('notes-b').value = ratings[currentTopic].notes_b || '';
+  document.getElementById('prev-btn').disabled = currentTopic === 0;
+  const isLast = currentTopic === topics.length - 1;
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = isLast ? 'View Results →' : 'Next →';
+  nextBtn.onclick = isLast ? finishRating : () => navigate(1);
+  // progress
+  const pct = Math.round(((currentTopic) / topics.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Topic ${currentTopic+1} of ${topics.length}`;
+  updateDots();
+}
+
+function buildStars(side, metric, value) {
+  const container = document.getElementById(`stars-${side}-${metric}`);
+  container.innerHTML = '';
+  for (let v = 1; v <= 5; v++) {
+    const btn = document.createElement('button');
+    btn.className = 'star' + (v <= value ? ' active' : '');
+    btn.textContent = '★';
+    btn.title = `${v}/5`;
+    btn.onclick = () => setRating(side, metric, v);
+    container.appendChild(btn);
+  }
+}
+
+function setRating(side, metric, value) {
+  saveNotes();
+  ratings[currentTopic][side][metric] = value;
+  buildStars(side, metric, value);
+  document.getElementById(`score-${side}-${metric}`).textContent = value + '/5';
+  updateDots();
+}
+
+function saveNotes() {
+  ratings[currentTopic].notes_a = document.getElementById('notes-a').value;
+  ratings[currentTopic].notes_b = document.getElementById('notes-b').value;
+}
+
+function navigate(dir) {
+  saveNotes();
+  currentTopic = Math.max(0, Math.min(topics.length - 1, currentTopic + dir));
+  renderTopic();
+}
+
+function jumpTo(i) {
+  saveNotes();
+  currentTopic = i;
+  renderTopic();
+}
+
+// ── RESULTS ──
+function finishRating() {
+  saveNotes();
+  document.getElementById('rating-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+  buildResults();
+}
+
+function avg(vals) { return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0; }
+function scoreBadge(v) {
+  const cls = v >= 4 ? 'high' : v >= 2.5 ? 'mid' : 'low';
+  return `<span class="score-badge ${cls}">${v.toFixed(1)}</span>`;
+}
+
+function buildResults() {
+  // per-metric aggregates
+  const aggAI = {grammar:[], cadence:[], accuracy:[]};
+  const aggH  = {grammar:[], cadence:[], accuracy:[]};
+
+  const tbody = document.getElementById('results-tbody');
+  tbody.innerHTML = '';
+
+  topics.forEach((t, idx) => {
+    const sm = shuffleMap[idx];
+    const r = ratings[idx];
+    // map sides back to ai/human
+    const aiSide = sm.a === 'ai' ? 'a' : 'b';
+    const huSide = sm.a === 'human' ? 'a' : 'b';
+    const aiR = r[aiSide]; const huR = r[huSide];
+
+    METRICS.forEach(m => {
+      aggAI[m].push(aiR[m]);
+      aggH[m].push(huR[m]);
+    });
+
+    const aiTotal = avg([aiR.grammar, aiR.cadence, aiR.accuracy]);
+    const huTotal = avg([huR.grammar, huR.cadence, huR.accuracy]);
+    const winner = aiTotal > huTotal ? 'AI' : huTotal > aiTotal ? 'Human' : 'Tie';
+    const winBadge = `<span class="winner-badge">${winner}</span>`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${t.name}</strong></td>
+      <td>${scoreBadge(aiR.grammar)}</td>
+      <td>${scoreBadge(aiR.cadence)}</td>
+      <td>${scoreBadge(aiR.accuracy)}</td>
+      <td>${scoreBadge(huR.grammar)}</td>
+      <td>${scoreBadge(huR.cadence)}</td>
+      <td>${scoreBadge(huR.accuracy)}</td>
+      <td>${winBadge}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // totals row
+  const tr = document.createElement('tr');
+  tr.className = 'reveal-row';
+  tr.innerHTML = `
+    <td><strong>Average</strong></td>
+    <td>${scoreBadge(avg(aggAI.grammar))}</td>
+    <td>${scoreBadge(avg(aggAI.cadence))}</td>
+    <td>${scoreBadge(avg(aggAI.accuracy))}</td>
+    <td>${scoreBadge(avg(aggH.grammar))}</td>
+    <td>${scoreBadge(avg(aggH.cadence))}</td>
+    <td>${scoreBadge(avg(aggH.accuracy))}</td>
+    <td></td>`;
+  tbody.appendChild(tr);
+
+  // summary cards
+  const cards = document.getElementById('summary-cards');
+  cards.innerHTML = '';
+  METRICS.forEach(m => {
+    const ai = avg(aggAI[m]);
+    const hu = avg(aggH[m]);
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    card.innerHTML = `
+      <div class="metric-name">${m.charAt(0).toUpperCase()+m.slice(1)}</div>
+      <div class="ai-score">${ai.toFixed(1)} <span style="font-size:0.7rem;color:var(--ink3)">AI avg</span></div>
+      <div class="vs">vs</div>
+      <div class="human-score">${hu.toFixed(1)} <span style="font-size:0.7rem;color:var(--ink3)">Human avg</span></div>`;
+    cards.appendChild(card);
+  });
+}
+
+function exportCSV() {
+  const headers = ['Topic','Grammar_AI','Cadence_AI','Accuracy_AI','Grammar_Human','Cadence_Human','Accuracy_Human','Notes_AI','Notes_Human'];
+  const rows = [headers.join(',')];
+  topics.forEach((t, idx) => {
+    const sm = shuffleMap[idx];
+    const r = ratings[idx];
+    const aiSide = sm.a === 'ai' ? 'a' : 'b';
+    const huSide = sm.a === 'human' ? 'a' : 'b';
+    const aiR = r[aiSide]; const huR = r[huSide];
+    const notesAI = (r[aiSide === 'a' ? 'notes_a' : 'notes_b'] || '').replace(/,/g,' ');
+    const notesHU = (r[huSide === 'a' ? 'notes_a' : 'notes_b'] || '').replace(/,/g,' ');
+    rows.push([t.name, aiR.grammar, aiR.cadence, aiR.accuracy, huR.grammar, huR.cadence, huR.accuracy, notesAI, notesHU].join(','));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'impact-report.csv';
+  a.click();
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
