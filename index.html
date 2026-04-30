@@ -483,13 +483,56 @@ let ratings = {};
 let currentTopic = 0;
 let shuffleMap = {}; // topic idx -> {a: 'ai'|'human', b: 'ai'|'human'}
 
+async function loadTopicsStatic() {
+  const res = await fetch('./articles/manifest.json', { headers: { 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error(`Failed to load articles/manifest.json (${res.status})`);
+  const manifest = await res.json();
+
+  const ids = Array.isArray(manifest)
+    ? manifest.map(x => String(x?.id ?? '').trim()).filter(Boolean)
+    : Object.keys(manifest || {}).map(k => String(k).trim()).filter(Boolean);
+
+  if (ids.length === 0) throw new Error('manifest.json has no topic ids');
+
+  const getName = (id) => {
+    if (Array.isArray(manifest)) {
+      const hit = manifest.find(x => String(x?.id ?? '').trim() === id);
+      return String(hit?.name ?? '').trim() || `Topic ${id}`;
+    }
+    const name = manifest?.[id];
+    return String(name ?? '').trim() || `Topic ${id}`;
+  };
+
+  const loaded = await Promise.all(ids.map(async (id) => {
+    const [aiRes, humanRes] = await Promise.all([
+      fetch(`./articles/${id}A.txt`, { headers: { 'Accept': 'text/plain' } }),
+      fetch(`./articles/${id}H.txt`, { headers: { 'Accept': 'text/plain' } })
+    ]);
+    if (!aiRes.ok || !humanRes.ok) return null;
+    const [ai, human] = await Promise.all([aiRes.text(), humanRes.text()]);
+    const aiTrim = (ai || '').trim();
+    const humanTrim = (human || '').trim();
+    if (!aiTrim || !humanTrim) return null;
+    return { name: getName(id), human: humanTrim, ai: aiTrim };
+  }));
+
+  return loaded.filter(Boolean);
+}
+
 async function initApp() {
   try {
-    const res = await fetch('/api/topics', { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error(`Failed to load topics (${res.status})`);
-    const data = await res.json();
+    let data = null;
+    try {
+      const res = await fetch('/api/topics', { headers: { 'Accept': 'application/json' } });
+      if (res.ok) data = await res.json();
+    } catch {}
+
     if (!Array.isArray(data) || data.length === 0) {
-      alert('No topics found in the backend. Add article pairs in the "articles/" folder (e.g. 1A.txt + 1H.txt), then refresh.');
+      data = await loadTopicsStatic();
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+      alert('No topics found. Add article pairs in the "articles/" folder (e.g. 1A.txt + 1H.txt) and set names in articles/manifest.json, then refresh.');
       return;
     }
 
@@ -518,7 +561,7 @@ async function initApp() {
     renderTopic();
   } catch (e) {
     console.error(e);
-    alert('Could not reach the backend. Start the server (node server.js) and open http://localhost:3000/');
+    alert('Could not load topics. If running locally, start the server (node server.js). If on GitHub Pages, ensure articles/manifest.json and your articles/*.txt files are present.');
   }
 }
 
